@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# rainbowkit-setup 🌈
 
-## Getting Started
+Minimal Next.js (app router) setup with RainbowKit and wagmi for EVM wallet integration.
 
-First, run the development server:
+## Project structure (key files)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- `src/components/TopBar.tsx` — Header component with app title and RainbowKit ```<ConnectButton/>``` for wallet connection.
+
+```tsx
+"use client";
+import React from "react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+
+export default function TopBar({ title = "Dapp" }: { title?: string }) {
+  return (
+    <header className="w-full bg-gray-900 text-white">
+      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <h1 className="text-lg font-semibold">{title}</h1>
+        <div>
+          <ConnectButton showBalance={false} accountStatus="address" />
+        </div>
+      </div>
+    </header>
+  );
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- `src/config/wagmiConfig.ts` — Exports ```wagmi``` configuration using RainbowKit's ```getDefaultConfig```, sets supported chains and WalletConnect project ID.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```tsx
+import { getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { mainnet, sepolia } from "wagmi/chains";
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+const walletConnectProjectId =
+  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ??
+  (() => {
+    throw new Error("WalletConnect API is required");
+  })();
 
-## Learn More
+export const config = getDefaultConfig({
+  appName: "Dapp",
+  projectId: walletConnectProjectId,
+  chains: [mainnet, sepolia],
+  ssr: true,
+});
 
-To learn more about Next.js, take a look at the following resources:
+export const chains = [mainnet, sepolia];
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `src/providers/WalletProviders.tsx` — Wraps the app with ```WagmiProvider```, ```QueryClientProvider```, and ```RainbowKitProvider``` for wallet connectivity and state management.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```tsx
+"use client";
+import React from "react";
+import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
+import { WagmiProvider } from "wagmi";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import "@rainbow-me/rainbowkit/styles.css";
+import { config } from '../config/wagmiConfig';
 
-## Deploy on Vercel
+const queryClient = new QueryClient();
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+export default function Providers({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider theme={darkTheme()}>{children}</RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
+}
+```
