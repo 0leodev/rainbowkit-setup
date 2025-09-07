@@ -1,13 +1,5 @@
 # rainbowkit-setup 🌈
 
-### npm
-
-```
-npm install @rainbow-me/rainbowkit@2.2.8 @tanstack/react-query@5.85.3 viem@2.34.0 wagmi@2.16.3
-```
-
-### pnpm
-
 ```
 pnpm install @rainbow-me/rainbowkit@2.2.8 @tanstack/react-query@5.85.3 viem@2.34.0 wagmi@2.16.3
 ```
