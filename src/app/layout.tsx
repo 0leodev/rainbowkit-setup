@@ -1,6 +1,7 @@
 "use client";
 import "./globals.css";
-import WalletProviders from "../providers/WalletProviders";
+import WalletProviders from "@/providers/WalletProviders";
+import TopBar from "@/components/TopBar";
 
 export default function RootLayout({
   children,
@@ -10,7 +11,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <WalletProviders>{children}</WalletProviders>
+        <WalletProviders>
+          <TopBar />
+          {children}
+        </WalletProviders>
       </body>
     </html>
   );
